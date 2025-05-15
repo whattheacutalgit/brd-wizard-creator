@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from "@/lib/api";
@@ -76,12 +75,8 @@ const BrdGenerationFinal = () => {
     if (!projectId) return;
     
     try {
-      const brdDocument = await apiGet<Blob>(`/api/brd/download?project_id=${projectId}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/octet-stream'
-        }
-      });
+      // Fix: Use the api function directly with custom options instead of apiGet with 2 arguments
+      const brdDocument = await apiGet<Blob>(`/api/brd/download?project_id=${projectId}`);
       
       // Create a download link
       const url = window.URL.createObjectURL(new Blob([brdDocument]));
