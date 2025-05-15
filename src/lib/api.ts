@@ -1,7 +1,7 @@
 
 import { toast } from "@/components/ui/sonner";
 
-const API_BASE_URL = 'https://api.brdwizard.com'; // Replace with actual API URL
+const API_BASE_URL = 'http://127.0.0.1:8000'; // Updated to specified local URL
 
 type ApiOptions = {
   method: string;

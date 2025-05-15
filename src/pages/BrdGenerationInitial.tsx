@@ -17,9 +17,13 @@ interface Project {
 }
 
 interface InitialBrdResponse {
-  content: string;
-  questions: string[];
-  brd_id: string;
+  reworded_summary: string;
+  completion_suggestions: {
+    status: string;
+    details: string[];
+  };
+  brd_draft: string;
+  brd_id: string; // Added for tracking the BRD
 }
 
 const BrdGenerationInitial = () => {
@@ -91,10 +95,11 @@ const BrdGenerationInitial = () => {
 
   const handleContinue = () => {
     if (!initialBrd) return;
-    navigate(`/brd/final/${initialBrd.brd_id}`, { 
+    navigate(`/brd/final/${initialBrd.brd_id || 'temp'}`, { 
       state: { 
-        questions: initialBrd.questions,
-        content: initialBrd.content,
+        questions: initialBrd.completion_suggestions?.details || [],
+        content: initialBrd.brd_draft,
+        summary: initialBrd.reworded_summary,
         projectId 
       } 
     });
@@ -180,7 +185,7 @@ const BrdGenerationInitial = () => {
             <CardContent>
               <div className="prose max-w-none dark:prose-invert">
                 <div className="p-4 max-h-96 overflow-y-auto border rounded-md bg-secondary/50">
-                  {initialBrd.content.split('\n').map((line, i) => (
+                  {initialBrd.brd_draft.split('\n').map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
                 </div>
@@ -197,7 +202,7 @@ const BrdGenerationInitial = () => {
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                {initialBrd.questions.map((question, idx) => (
+                {initialBrd.completion_suggestions?.details.map((question, idx) => (
                   <li key={idx} className="text-sm">{question}</li>
                 ))}
               </ul>

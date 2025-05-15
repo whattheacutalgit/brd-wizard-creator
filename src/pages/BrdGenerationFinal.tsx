@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from "@/lib/api";
@@ -6,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Download, Copy, Check } from "lucide-react";
+import { FileText, Download, Copy, Check, Plus, Trash } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 interface FinalBrdResponse {
-  content: string;
-  feedback: string;
+  brd_document: string;
+  review_feedback: string;
 }
 
 const BrdGenerationFinal = () => {
@@ -19,22 +21,30 @@ const BrdGenerationFinal = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [initialContent, setInitialContent] = useState<string>("");
+  const [initialSummary, setInitialSummary] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
   const [finalBrd, setFinalBrd] = useState<FinalBrdResponse | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [newQuestion, setNewQuestion] = useState("");
 
   useEffect(() => {
     // Getting data from navigation state or fetching it if needed
     if (location.state) {
-      const { questions, content, projectId: id } = location.state;
+      const { questions, content, summary, projectId: id } = location.state;
       setQuestions(questions || []);
       setInitialContent(content || "");
+      setInitialSummary(summary || "");
       setProjectId(id || "");
-      // Initialize answers array with empty strings
-      setAnswers(new Array(questions?.length || 0).fill(""));
+      
+      // Initialize answers object with empty strings for each question
+      const initialAnswers: Record<string, string> = {};
+      questions?.forEach((q: string) => {
+        initialAnswers[q] = "";
+      });
+      setAnswers(initialAnswers);
     } else {
       // If no state was passed, fetch data from API
       // In a real app, you would implement this
@@ -43,14 +53,33 @@ const BrdGenerationFinal = () => {
     }
   }, [location.state, navigate]);
 
-  const handleAnswerChange = (index: number, value: string) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = value;
+  const handleAnswerChange = (question: string, value: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [question]: value
+    }));
+  };
+
+  const addCustomQuestion = () => {
+    if (!newQuestion.trim()) return;
+    
+    setQuestions(prev => [...prev, newQuestion]);
+    setAnswers(prev => ({
+      ...prev,
+      [newQuestion]: ""
+    }));
+    setNewQuestion("");
+  };
+
+  const removeQuestion = (questionToRemove: string) => {
+    setQuestions(questions.filter(q => q !== questionToRemove));
+    const newAnswers = { ...answers };
+    delete newAnswers[questionToRemove];
     setAnswers(newAnswers);
   };
 
   const handleGenerateFinalBrd = async () => {
-    if (!brdId || answers.some(answer => !answer.trim())) {
+    if (!brdId || Object.values(answers).some(a => !a.trim())) {
       toast.error("Please answer all questions to generate the final BRD");
       return;
     }
@@ -58,9 +87,8 @@ const BrdGenerationFinal = () => {
     setGenerating(true);
     try {
       const response = await apiPost<FinalBrdResponse>("/api/brd/generate-final", {
-        brd_id: brdId,
-        answers: answers,
-        project_id: projectId
+        project_id: projectId,
+        completion_answers: JSON.stringify(answers)
       });
       setFinalBrd(response);
       toast.success("Final BRD generated successfully");
@@ -75,17 +103,10 @@ const BrdGenerationFinal = () => {
     if (!projectId) return;
     
     try {
-      // Fix: Use the api function directly with custom options instead of apiGet with 2 arguments
-      const brdDocument = await apiGet<Blob>(`/api/brd/download?project_id=${projectId}`);
-      
-      // Create a download link
-      const url = window.URL.createObjectURL(new Blob([brdDocument]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `BRD-${projectId}.docx`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
+      // Use the api function directly with custom options
+      const url = `/api/brd/download?project_id=${projectId}`;
+      window.open(`http://127.0.0.1:8000${url}`, '_blank');
+      toast.success("Downloading document");
     } catch (error) {
       console.error("Failed to download BRD", error);
       toast.error("Failed to download document");
@@ -95,7 +116,7 @@ const BrdGenerationFinal = () => {
   const handleCopyToClipboard = () => {
     if (!finalBrd) return;
     
-    navigator.clipboard.writeText(finalBrd.content)
+    navigator.clipboard.writeText(finalBrd.brd_document)
       .then(() => {
         setCopied(true);
         toast.success("BRD content copied to clipboard");
@@ -126,23 +147,48 @@ const BrdGenerationFinal = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {questions.map((question, idx) => (
-              <div key={idx} className="space-y-2">
-                <Label htmlFor={`question-${idx}`}>
-                  {idx + 1}. {question}
-                </Label>
+              <div key={idx} className="space-y-2 relative">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor={`question-${idx}`}>{idx + 1}. {question}</Label>
+                  {!question.startsWith("What is the") && !question.startsWith("Who are the") && !question.startsWith("Are there any") && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => removeQuestion(question)}
+                      className="text-destructive hover:text-destructive/80"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                 <Textarea
                   id={`question-${idx}`}
                   placeholder="Your answer..."
-                  value={answers[idx] || ""}
-                  onChange={(e) => handleAnswerChange(idx, e.target.value)}
+                  value={answers[question] || ""}
+                  onChange={(e) => handleAnswerChange(question, e.target.value)}
                   rows={3}
                 />
               </div>
             ))}
 
+            <div className="pt-4 border-t">
+              <p className="font-medium text-sm mb-2">Add Custom Question</p>
+              <div className="flex space-x-2">
+                <Input
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  placeholder="Enter a custom question..."
+                  className="flex-1"
+                />
+                <Button onClick={addCustomQuestion} disabled={!newQuestion.trim()}>
+                  <Plus className="h-4 w-4 mr-1" /> Add
+                </Button>
+              </div>
+            </div>
+
             <Button 
               onClick={handleGenerateFinalBrd} 
-              disabled={generating || answers.some(a => !a.trim())}
+              disabled={generating || Object.values(answers).some(a => !a.trim())}
               className="w-full mt-4"
             >
               {generating ? 
@@ -183,7 +229,7 @@ const BrdGenerationFinal = () => {
                 <CardContent>
                   <div className="prose max-w-none dark:prose-invert">
                     <div className="p-6 border rounded-md bg-white">
-                      {finalBrd.content.split('\n').map((line, i) => (
+                      {finalBrd.brd_document.split('\n').map((line, i) => (
                         <p key={i}>{line}</p>
                       ))}
                     </div>
@@ -203,7 +249,7 @@ const BrdGenerationFinal = () => {
                 <CardContent>
                   <div className="prose max-w-none dark:prose-invert">
                     <div className="p-4 border rounded-md bg-secondary/30">
-                      {finalBrd.feedback.split('\n').map((line, i) => (
+                      {finalBrd.review_feedback.split('\n').map((line, i) => (
                         <p key={i}>{line}</p>
                       ))}
                     </div>
@@ -222,11 +268,11 @@ const BrdGenerationFinal = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {questions.map((question, idx) => (
+                    {Object.entries(answers).map(([question, answer], idx) => (
                       <div key={idx} className="space-y-2">
                         <p className="font-medium">{idx + 1}. {question}</p>
                         <p className="text-muted-foreground bg-secondary/30 p-3 rounded-md">
-                          {answers[idx]}
+                          {answer}
                         </p>
                       </div>
                     ))}

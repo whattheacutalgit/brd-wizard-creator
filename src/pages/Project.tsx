@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, Upload } from "lucide-react";
+import { FileText, Plus, Upload, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,6 +29,7 @@ interface Document {
   created_at: string;
   summary: string | null;
   project_id: string;
+  path?: string; // Added path field for document viewing
 }
 
 const Project = () => {
@@ -37,6 +38,8 @@ const Project = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [viewDocumentDialogOpen, setViewDocumentDialogOpen] = useState(false);
+  const [currentDocument, setCurrentDocument] = useState<Document | null>(null);
   const [description, setDescription] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -64,7 +67,14 @@ const Project = () => {
       
       // Fetch documents
       const docs = await apiGet<Document[]>(`/api/documents/project/${projectId}`);
-      setDocuments(docs);
+      
+      // Add current date to documents since the backend doesn't provide this
+      const docsWithDates = docs.map(doc => ({
+        ...doc,
+        created_at: doc.created_at || new Date().toISOString()
+      }));
+      
+      setDocuments(docsWithDates);
     } catch (error) {
       console.error("Failed to fetch project data", error);
       toast.error("Failed to load project data");
@@ -89,19 +99,38 @@ const Project = () => {
     formData.append("description", description);
     
     try {
-      await apiUpload<Document>("/api/documents/upload", formData);
+      const response = await apiUpload<Document>("/api/documents/upload", formData);
+      
+      // Add current date since the backend may not provide it
+      const documentWithDate = {
+        ...response,
+        created_at: new Date().toISOString()
+      };
+      
       toast.success("Document uploaded successfully");
       setUploadDialogOpen(false);
       setSelectedFile(null);
       setDescription("");
-      // Refetch documents
-      const docs = await apiGet<Document[]>(`/api/documents/project/${projectId}`);
-      setDocuments(docs);
+      
+      // Add the new document to the list
+      setDocuments([...documents, documentWithDate]);
     } catch (error) {
       console.error("Failed to upload document", error);
     } finally {
       setUploading(false);
     }
+  };
+
+  const viewDocument = (doc: Document) => {
+    setCurrentDocument(doc);
+    setViewDocumentDialogOpen(true);
+  };
+
+  const getDocumentUrl = (doc: Document) => {
+    if (doc.path) {
+      return `http://127.0.0.1:8000/${doc.path}`;
+    }
+    return `http://127.0.0.1:8000/api/documents/${doc.id}/view`;
   };
 
   if (loading) {
@@ -181,6 +210,39 @@ const Project = () => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Document View Dialog */}
+          <Dialog open={viewDocumentDialogOpen} onOpenChange={setViewDocumentDialogOpen}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>{currentDocument?.filename}</DialogTitle>
+                <DialogDescription>{currentDocument?.description}</DialogDescription>
+              </DialogHeader>
+              <div className="h-[70vh] overflow-auto">
+                {currentDocument && (
+                  <iframe 
+                    src={getDocumentUrl(currentDocument)}
+                    width="100%"
+                    height="100%"
+                    title={currentDocument.filename}
+                    className="border rounded"
+                  />
+                )}
+              </div>
+              <DialogFooter>
+                <Button asChild>
+                  <a 
+                    href={currentDocument ? getDocumentUrl(currentDocument) : '#'} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" /> Open in New Tab
+                  </a>
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <Link to={`/brd/generate/${projectId}`}>
             <Button variant="outline">
               <FileText className="mr-2 h-4 w-4" /> Generate BRD
@@ -236,9 +298,18 @@ const Project = () => {
                           No summary available
                         </p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-4">
-                        Uploaded on {new Date(doc.created_at).toLocaleString()}
-                      </p>
+                      <div className="flex justify-between items-center mt-4">
+                        <p className="text-xs text-muted-foreground">
+                          Uploaded on {new Date(doc.created_at).toLocaleString()}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => viewDocument(doc)}
+                        >
+                          View Document
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
