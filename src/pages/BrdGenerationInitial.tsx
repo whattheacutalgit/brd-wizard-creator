@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, apiUpload } from "@/lib/api";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -83,11 +83,13 @@ const BrdGenerationInitial = () => {
     }
 
     try {
-      const response = await apiPost<InitialBrdResponse>("/api/brd/generate-initial", formData);
+      // Use apiUpload instead of apiPost for FormData
+      const response = await apiUpload<InitialBrdResponse>("/api/brd/generate-initial", formData);
       setInitialBrd(response);
       toast.success("Initial BRD draft generated successfully");
     } catch (error) {
       console.error("Failed to generate initial BRD", error);
+      // Error is already shown by the api function
     } finally {
       setGenerating(false);
     }
@@ -95,11 +97,16 @@ const BrdGenerationInitial = () => {
 
   const handleContinue = () => {
     if (!initialBrd) return;
+    
+    const questions = Array.isArray(initialBrd.completion_suggestions?.details) 
+      ? initialBrd.completion_suggestions.details 
+      : [];
+      
     navigate(`/brd/final/${initialBrd.brd_id || 'temp'}`, { 
       state: { 
-        questions: initialBrd.completion_suggestions?.details || [],
-        content: initialBrd.brd_draft,
-        summary: initialBrd.reworded_summary,
+        questions: questions,
+        content: initialBrd.brd_draft || '',
+        summary: initialBrd.reworded_summary || '',
         projectId 
       } 
     });
@@ -185,9 +192,10 @@ const BrdGenerationInitial = () => {
             <CardContent>
               <div className="prose max-w-none dark:prose-invert">
                 <div className="p-4 max-h-96 overflow-y-auto border rounded-md bg-secondary/50">
-                  {initialBrd.brd_draft.split('\n').map((line, i) => (
-                    <p key={i}>{line}</p>
-                  ))}
+                  {typeof initialBrd.brd_draft === 'string' && 
+                    initialBrd.brd_draft.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
                 </div>
               </div>
             </CardContent>
@@ -202,9 +210,10 @@ const BrdGenerationInitial = () => {
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                {initialBrd.completion_suggestions?.details.map((question, idx) => (
-                  <li key={idx} className="text-sm">{question}</li>
-                ))}
+                {Array.isArray(initialBrd.completion_suggestions?.details) && 
+                  initialBrd.completion_suggestions.details.map((question, idx) => (
+                    <li key={idx} className="text-sm">{question}</li>
+                  ))}
               </ul>
               <div className="mt-8">
                 <Button onClick={handleContinue} className="w-full">

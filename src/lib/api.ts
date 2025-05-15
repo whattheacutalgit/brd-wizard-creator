@@ -58,7 +58,11 @@ export const api = async <T>(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.detail || 'Something went wrong';
+      // Safely extract error message, avoiding passing objects directly
+      const errorMessage = typeof errorData.detail === 'string' 
+        ? errorData.detail 
+        : 'Something went wrong';
+      
       toast.error(errorMessage);
       throw new Error(errorMessage);
     }
@@ -74,8 +78,14 @@ export const api = async <T>(
     if (error instanceof Error) {
       console.error(`API Error: ${error.message}`);
       if (error.message !== 'Unauthorized') { // Avoid duplicate error message
-        toast.error(error.message || 'Something went wrong');
+        // Ensure we're only passing strings to toast
+        const errorMsg = typeof error.message === 'string' ? error.message : 'Request failed';
+        toast.error(errorMsg);
       }
+    } else {
+      // Handle non-Error objects
+      toast.error('An unexpected error occurred');
+      console.error('Unexpected error:', error);
     }
     throw error;
   }
