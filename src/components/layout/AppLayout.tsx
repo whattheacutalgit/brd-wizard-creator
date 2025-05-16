@@ -97,20 +97,9 @@ const AppLayout = () => {
               <Users className="h-5 w-5 mr-3" />
               <span>My Groups</span>
             </Link>
-            <Link
-              to="/brds"
-              className="flex items-center px-4 py-3 text-gray-800 rounded-md hover:bg-white hover:shadow-sm"
-            >
-              <BookText className="h-5 w-5 mr-3" />
-              <span>Generated BRDs</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="flex items-center px-4 py-3 text-gray-800 rounded-md hover:bg-white hover:shadow-sm"
-            >
-              <User className="h-5 w-5 mr-3" />
-              <span>Profile</span>
-            </Link>
+           
+            
+             
           </nav>
         </aside>
 

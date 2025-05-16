@@ -187,7 +187,7 @@ const Dashboard = () => {
             onClick={viewGeneratedBrds}
             className="bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100"
           >
-            <FileText className="mr-2 h-4 w-4" /> View Generated BRDs
+             <Plus className="mr-2 h-4 w-4" /> Join a Group
           </Button>
           <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
             <DialogTrigger asChild>
