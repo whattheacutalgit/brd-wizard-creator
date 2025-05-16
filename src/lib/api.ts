@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/sonner";
 
 const API_BASE_URL = 'http://127.0.0.1:8000'; // Updated to specified local URL
@@ -107,4 +106,37 @@ export const apiUpload = <T>(endpoint: string, formData: FormData): Promise<T> =
     method: 'POST',
     body: formData
   });
+};
+
+export const apiDelete = async <T = any>(
+  endpoint: string
+): Promise<T> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage =
+        errorData.message || `Error: ${response.status} ${response.statusText}`;
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return await response.json();
+    }
+    
+    return {} as T;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    toast.error(message);
+    throw error;
+  }
 };

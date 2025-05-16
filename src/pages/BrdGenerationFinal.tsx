@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from "@/lib/api";
@@ -129,7 +130,7 @@ const BrdGenerationFinal = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+      <div className="bg-gray-700 text-white p-6 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold">Generate BRD - Final Draft</h1>
         <p className="mt-2 opacity-90">
           Answer the follow-up questions to refine your Business Requirements Document
@@ -183,7 +184,7 @@ const BrdGenerationFinal = () => {
                 <Button 
                   onClick={addCustomQuestion} 
                   disabled={!newQuestion.trim()}
-                  className="bg-gray-800 hover:bg-gray-900 text-white"
+                  className="bg-gray-700 hover:bg-gray-800 text-white"
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add
                 </Button>
@@ -193,7 +194,7 @@ const BrdGenerationFinal = () => {
             <Button 
               onClick={handleGenerateFinalBrd} 
               disabled={generating || Object.values(answers).some(a => !a.trim())}
-              className="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white"
+              className="w-full mt-4 bg-gray-700 hover:bg-gray-800 text-white"
             >
               {generating ? (
                 <>

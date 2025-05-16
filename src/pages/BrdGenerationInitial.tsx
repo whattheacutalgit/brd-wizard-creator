@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiGet, apiPost, apiUpload } from "@/lib/api";
@@ -135,7 +136,7 @@ const BrdGenerationInitial = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+      <div className="bg-gray-700 text-white p-6 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold">Generate BRD - Initial Draft</h1>
         <p className="mt-2 opacity-90">
           {project?.name} - Create an initial draft of your Business Requirements Document

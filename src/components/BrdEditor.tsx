@@ -194,7 +194,7 @@ const BrdEditor: React.FC<BrdEditorProps> = ({ initialContent, onSave }) => {
                 variant="default" 
                 size="sm" 
                 onClick={handleSave}
-                className="bg-gray-800 hover:bg-gray-900 text-white"
+                className="bg-gray-700 hover:bg-gray-800 text-white"
               >
                 Save Changes
               </Button>
@@ -224,7 +224,7 @@ const BrdEditor: React.FC<BrdEditorProps> = ({ initialContent, onSave }) => {
                 variant="default" 
                 size="sm" 
                 onClick={exportToPdf}
-                className="bg-gray-800 hover:bg-gray-900 text-white"
+                className="bg-gray-700 hover:bg-gray-800 text-white"
               >
                 <Download className="h-4 w-4 mr-1" /> Download
               </Button>
@@ -233,7 +233,7 @@ const BrdEditor: React.FC<BrdEditorProps> = ({ initialContent, onSave }) => {
           <div 
             className="p-6 prose max-w-none h-[500px] overflow-y-auto"
           >
-            {content.split('\n').map((line, i) => {
+            {content && content.split('\n').map((line, i) => {
               const formattedLine = formatMarkdownText(line);
               return <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine || "&nbsp;" }} />;
             })}
