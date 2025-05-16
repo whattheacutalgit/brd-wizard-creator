@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { FileText, ArrowRight } from "lucide-react";
+import { FileText, ArrowRight, UploadCloud } from "lucide-react";
 
 interface Project {
   id: string;
@@ -36,6 +36,7 @@ const BrdGenerationInitial = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [initialBrd, setInitialBrd] = useState<InitialBrdResponse | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadDate, setUploadDate] = useState<string>(new Date().toISOString());
 
   useEffect(() => {
     if (projectId) {
@@ -64,6 +65,7 @@ const BrdGenerationInitial = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
+      setUploadDate(new Date().toISOString());
     }
   };
 
@@ -83,7 +85,6 @@ const BrdGenerationInitial = () => {
     }
 
     try {
-      // Use apiUpload instead of apiPost for FormData
       const response = await apiUpload<InitialBrdResponse>("/api/brd/generate-initial", formData);
       setInitialBrd(response);
       toast.success("Initial BRD draft generated successfully");
@@ -107,9 +108,18 @@ const BrdGenerationInitial = () => {
         questions: questions,
         content: initialBrd.brd_draft || '',
         summary: initialBrd.reworded_summary || '',
-        projectId 
+        projectId,
+        uploadDate
       } 
     });
+  };
+
+  const viewDocument = () => {
+    if (!selectedFile) return;
+    
+    // Create object URL for the uploaded file
+    const fileUrl = URL.createObjectURL(selectedFile);
+    window.open(fileUrl, '_blank');
   };
 
   if (loading) {
@@ -125,45 +135,65 @@ const BrdGenerationInitial = () => {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold">Generate BRD - Initial Draft</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 opacity-90">
           {project?.name} - Create an initial draft of your Business Requirements Document
         </p>
       </div>
 
       {!initialBrd ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>BRD Generation Settings</CardTitle>
-            <CardDescription>
+        <Card className="bg-gradient-to-b from-white to-blue-50 border-blue-100 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+            <CardTitle className="text-blue-800">BRD Generation Settings</CardTitle>
+            <CardDescription className="text-blue-600">
               Provide information to generate your initial BRD draft
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-6">
             <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
+              <Label htmlFor="prompt" className="text-blue-700 font-medium">Prompt</Label>
               <Textarea
                 id="prompt"
                 placeholder="Describe what you want in your Business Requirements Document..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={5}
+                className="border-blue-200 focus:border-blue-400"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-blue-600">
                 For example: "Create a BRD for an e-commerce platform with user authentication, product catalog, cart functionality, and payment processing."
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="template">Template (Optional)</Label>
-              <Input
-                id="template"
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-              <p className="text-xs text-muted-foreground">
+            <div className="space-y-2 bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <Label htmlFor="template" className="text-blue-700 font-medium">Template (Optional)</Label>
+              <div className="flex flex-col space-y-3">
+                <Input
+                  id="template"
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="border-blue-200 focus:border-blue-400"
+                />
+                {selectedFile && (
+                  <div className="flex items-center justify-between p-2 bg-white rounded border border-blue-200">
+                    <div className="flex items-center">
+                      <FileText className="h-5 w-5 text-blue-600 mr-2" />
+                      <span className="text-sm">{selectedFile.name}</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={viewDocument}
+                      className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                    >
+                      View
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-blue-600">
                 Upload a template document to base your BRD on (DOCX, PDF, etc.)
               </p>
             </div>
@@ -171,55 +201,67 @@ const BrdGenerationInitial = () => {
             <Button 
               onClick={handleGenerateInitialBrd} 
               disabled={!prompt || generating}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
             >
-              {generating ? 
-                "Generating Draft..." : 
-                "Generate Initial BRD Draft"
-              }
+              {generating ? (
+                <>
+                  <div className="mr-2 animate-spin">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  Generating Draft...
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="mr-2 h-5 w-5" />
+                  Generate Initial BRD Draft
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Initial BRD Draft</CardTitle>
-              <CardDescription>
+          <Card className="lg:col-span-2 bg-gradient-to-b from-white to-blue-50 border-blue-100 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+              <CardTitle className="text-blue-800">Initial BRD Draft</CardTitle>
+              <CardDescription className="text-blue-600">
                 Review the AI-generated draft of your Business Requirements Document
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="prose max-w-none dark:prose-invert">
-                <div className="p-4 max-h-96 overflow-y-auto border rounded-md bg-secondary/50">
+                <div className="p-4 max-h-96 overflow-y-auto border border-blue-200 rounded-md bg-white shadow-sm">
                   {typeof initialBrd.brd_draft === 'string' && 
                     initialBrd.brd_draft.split('\n').map((line, i) => (
-                      <p key={i}>{line}</p>
+                      <p key={i}>{line || "\u00A0"}</p>
                     ))}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Follow-up Questions</CardTitle>
-              <CardDescription>
+          <Card className="bg-gradient-to-b from-white to-blue-50 border-blue-100 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+              <CardTitle className="text-blue-800">Follow-up Questions</CardTitle>
+              <CardDescription className="text-blue-600">
                 The AI has identified these questions to help refine your BRD
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="list-disc pl-5 space-y-2">
+            <CardContent className="p-6">
+              <ul className="list-disc pl-5 space-y-2 text-blue-700">
                 {Array.isArray(initialBrd.completion_suggestions?.details) && 
                   initialBrd.completion_suggestions.details.map((question, idx) => (
                     <li key={idx} className="text-sm">{question}</li>
                   ))}
               </ul>
               <div className="mt-8">
-                <Button onClick={handleContinue} className="w-full">
+                <Button 
+                  onClick={handleContinue} 
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
+                >
                   Continue to Final BRD <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <p className="text-xs text-center text-muted-foreground mt-2">
+                <p className="text-xs text-center text-blue-600 mt-2">
                   You'll be able to answer these questions in the next step
                 </p>
               </div>
