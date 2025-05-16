@@ -88,7 +88,7 @@ const AppLayout = () => {
       </header>
 
       <div className="flex flex-1">
-        <aside className="w-64 bg-gray-100 border-r border-gray-200 hidden md:block">
+        <aside className="w-64 bg-gray-50 border-r border-gray-200 hidden md:block">
           <nav className="p-4 space-y-1">
             <Link
               to="/dashboard"

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, Heading1, Heading2, ListOrdered, Download } from "lucide-react";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface BrdEditorProps {
   initialContent: string;
@@ -135,26 +136,6 @@ const BrdEditor: React.FC<BrdEditorProps> = ({ initialContent, onSave }) => {
     document.body.removeChild(element);
   };
 
-  const formatMarkdownForPreview = (text: string): string => {
-    if (!text) return "";
-    
-    // Handle bold text
-    let formatted = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    
-    // Handle italics
-    formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
-    
-    // Handle headers
-    formatted = formatted.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold my-2">$1</h1>');
-    formatted = formatted.replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold my-2">$1</h2>');
-    
-    // Handle bullet points
-    formatted = formatted.replace(/^\* (.+)$/gm, '<li class="ml-4">• $1</li>');
-    
-    // Return empty non-breaking space if the result is empty
-    return formatted || "&nbsp;";
-  };
-
   return (
     <div className="bg-white border border-gray-300 rounded-md shadow-sm">
       {editMode ? (
@@ -251,10 +232,9 @@ const BrdEditor: React.FC<BrdEditorProps> = ({ initialContent, onSave }) => {
           </div>
           <div 
             className="p-6 prose max-w-none h-[500px] overflow-y-auto"
-            style={{ color: '#000000' }}
           >
             {content.split('\n').map((line, i) => {
-              const formattedLine = formatMarkdownForPreview(line);
+              const formattedLine = formatMarkdownText(line);
               return <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine || "&nbsp;" }} />;
             })}
           </div>

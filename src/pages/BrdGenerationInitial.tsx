@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiGet, apiPost, apiUpload } from "@/lib/api";
@@ -135,7 +134,7 @@ const BrdGenerationInitial = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold">Generate BRD - Initial Draft</h1>
         <p className="mt-2 opacity-90">
           {project?.name} - Create an initial draft of your Business Requirements Document
@@ -201,7 +200,7 @@ const BrdGenerationInitial = () => {
             <Button 
               onClick={handleGenerateInitialBrd} 
               disabled={!prompt || generating}
-              className="w-full bg-gray-800 hover:bg-gray-900 text-white"
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white"
             >
               {generating ? (
                 <>
@@ -233,7 +232,7 @@ const BrdGenerationInitial = () => {
                 <div className="p-4 max-h-96 overflow-y-auto border border-gray-200 rounded-md bg-white shadow-sm">
                   {typeof initialBrd.brd_draft === 'string' && 
                     initialBrd.brd_draft.split('\n').map((line, i) => (
-                      <div key={i}>{line || "\u00A0"}</div>
+                      <div key={i} dangerouslySetInnerHTML={{ __html: formatMarkdownText(line) }} />
                     ))}
                 </div>
               </div>
@@ -257,7 +256,7 @@ const BrdGenerationInitial = () => {
               <div className="mt-8">
                 <Button 
                   onClick={handleContinue} 
-                  className="w-full bg-gray-800 hover:bg-gray-900 text-white"
+                  className="w-full bg-gray-700 hover:bg-gray-800 text-white"
                 >
                   Continue to Final BRD <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

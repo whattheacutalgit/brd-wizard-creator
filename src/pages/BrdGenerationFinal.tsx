@@ -94,7 +94,8 @@ const BrdGenerationFinal = () => {
     try {
       const response = await apiPost<FinalBrdResponse>("/api/brd/generate-final", {
         project_id: projectId,
-        completion_answers: JSON.stringify(answers)
+        brd_id: brdId,
+        completion_answers: answers
       });
       setFinalBrd(response);
       setEditedBrdContent(response.brd_document);
@@ -128,7 +129,7 @@ const BrdGenerationFinal = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold">Generate BRD - Final Draft</h1>
         <p className="mt-2 opacity-90">
           Answer the follow-up questions to refine your Business Requirements Document
@@ -252,8 +253,8 @@ const BrdGenerationFinal = () => {
                 <CardContent className="p-6">
                   <div className="prose max-w-none">
                     <div className="p-4 border border-gray-200 rounded-md bg-gray-50/50">
-                      {finalBrd.review_feedback.split('\n').map((line, i) => (
-                        <div key={i}>{line || "\u00A0"}</div>
+                      {finalBrd.review_feedback && finalBrd.review_feedback.split('\n').map((line, i) => (
+                        <div key={i} dangerouslySetInnerHTML={{ __html: formatMarkdownText(line) }} />
                       ))}
                     </div>
                   </div>
@@ -288,7 +289,7 @@ const BrdGenerationFinal = () => {
           <div className="flex justify-end">
             <Button 
               onClick={() => navigate(`/projects/${projectId}`)}
-              className="bg-gray-800 hover:bg-gray-900 text-white"
+              className="bg-gray-700 hover:bg-gray-800 text-white"
             >
               Return to Project
             </Button>
