@@ -4,7 +4,7 @@ import { Outlet, useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { apiGet, isAuthenticated, clearAuthToken } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { FileText, LogOut, User, Users } from "lucide-react";
+import { FileText, LogOut, User, Users, BookText } from "lucide-react";
 
 interface User {
   id: string;
@@ -88,7 +88,7 @@ const AppLayout = () => {
       </header>
 
       <div className="flex flex-1">
-        <aside className="w-64 bg-gray-100 border-r border-gray-200 hidden md:block">
+        <aside className="w-64 bg-gray-50 border-r border-gray-200 hidden md:block">
           <nav className="p-4 space-y-1">
             <Link
               to="/dashboard"
@@ -96,6 +96,13 @@ const AppLayout = () => {
             >
               <Users className="h-5 w-5 mr-3" />
               <span>My Groups</span>
+            </Link>
+            <Link
+              to="/brds"
+              className="flex items-center px-4 py-3 text-gray-800 rounded-md hover:bg-white hover:shadow-sm"
+            >
+              <BookText className="h-5 w-5 mr-3" />
+              <span>Generated BRDs</span>
             </Link>
             <Link
               to="/profile"

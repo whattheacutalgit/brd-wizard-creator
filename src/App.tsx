@@ -12,6 +12,7 @@ import Dashboard from "@/pages/Dashboard";
 import Project from "@/pages/Project";
 import BrdGenerationInitial from "@/pages/BrdGenerationInitial";
 import BrdGenerationFinal from "@/pages/BrdGenerationFinal";
+import GeneratedBrds from "@/pages/GeneratedBrds";
 import Index from "@/pages/Index";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/" element={<AppLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="projects/:projectId" element={<Project />} />
+            <Route path="brds" element={<GeneratedBrds />} />
             <Route path="brd/generate/:projectId" element={<BrdGenerationInitial />} />
             <Route path="brd/final/:brdId" element={<BrdGenerationFinal />} />
           </Route>

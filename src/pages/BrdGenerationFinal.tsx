@@ -11,6 +11,7 @@ import { FileText, Copy, Check, Plus, Trash, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import BrdEditor from "@/components/BrdEditor";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface FinalBrdResponse {
   brd_document: string;
@@ -149,7 +150,7 @@ const handleGenerateFinalBrd = async () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <div className="bg-gray-700 text-white p-6 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold">Generate BRD - Final Draft</h1>
         <p className="mt-2 opacity-90">
           Answer the follow-up questions to refine your Business Requirements Document
@@ -203,7 +204,7 @@ const handleGenerateFinalBrd = async () => {
                 <Button 
                   onClick={addCustomQuestion} 
                   disabled={!newQuestion.trim()}
-                  className="bg-gray-800 hover:bg-gray-900 text-white"
+                  className="bg-gray-700 hover:bg-gray-800 text-white"
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add
                 </Button>
@@ -213,7 +214,7 @@ const handleGenerateFinalBrd = async () => {
             <Button 
               onClick={handleGenerateFinalBrd} 
               disabled={generating || Object.values(answers).some(a => !a.trim())}
-              className="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white"
+              className="w-full mt-4 bg-gray-700 hover:bg-gray-800 text-white"
             >
               {generating ? (
                 <>
@@ -273,8 +274,8 @@ const handleGenerateFinalBrd = async () => {
                 <CardContent className="p-6">
                   <div className="prose max-w-none">
                     <div className="p-4 border border-gray-200 rounded-md bg-gray-50/50">
-                      {finalBrd.review_feedback.split('\n').map((line, i) => (
-                        <div key={i}>{line || "\u00A0"}</div>
+                      {finalBrd.review_feedback && finalBrd.review_feedback.split('\n').map((line, i) => (
+                        <div key={i} dangerouslySetInnerHTML={{ __html: formatMarkdownText(line) }} />
                       ))}
                     </div>
                   </div>
@@ -309,7 +310,7 @@ const handleGenerateFinalBrd = async () => {
           <div className="flex justify-end">
             <Button 
               onClick={() => navigate(`/projects/${projectId}`)}
-              className="bg-gray-800 hover:bg-gray-900 text-white"
+              className="bg-gray-700 hover:bg-gray-800 text-white"
             >
               Return to Project
             </Button>
