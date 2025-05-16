@@ -80,11 +80,11 @@
 
 @layer components {
   .brd-card {
-    @apply p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow;
+    @apply p-6 bg-white rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-shadow;
   }
 
   .brd-btn-primary {
-    @apply px-5 py-2.5 rounded-md bg-primary text-white font-medium hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 transition-colors;
+    @apply px-5 py-2.5 rounded-md bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium hover:from-blue-700 hover:to-indigo-800 focus:ring-2 focus:ring-blue-500/50 transition-colors;
   }
   
   .brd-btn-secondary {
@@ -92,7 +92,7 @@
   }
 
   .brd-input {
-    @apply px-3 py-2 rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply px-3 py-2 rounded-md border border-blue-200 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
 
   .brd-container {
@@ -100,6 +100,43 @@
   }
 
   .brd-document-preview {
-    @apply p-4 border rounded-md bg-white shadow-sm;
+    @apply p-4 border rounded-md bg-white shadow-sm border-blue-200;
+  }
+
+  .gradient-heading {
+    @apply bg-gradient-to-r from-blue-700 to-indigo-800 text-transparent bg-clip-text;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-sm bg-white/90 border border-blue-100 shadow-lg;
+  }
+  
+  /* Markdown formatting styles */
+  strong {
+    @apply font-bold;
+  }
+  
+  em {
+    @apply italic;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-blue-800 my-3;
+  }
+  
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
+  ul li {
+    @apply list-disc list-inside my-1;
   }
 }
