@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiGet, apiPost, apiUpload } from "@/lib/api";
@@ -9,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { FileText, ArrowRight, UploadCloud } from "lucide-react";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface Project {
   id: string;
@@ -232,9 +232,10 @@ const BrdGenerationInitial = () => {
               <div className="prose max-w-none dark:prose-invert">
                 <div className="p-4 max-h-96 overflow-y-auto border border-blue-200 rounded-md bg-white shadow-sm">
                   {typeof initialBrd.brd_draft === 'string' && 
-                    initialBrd.brd_draft.split('\n').map((line, i) => (
-                      <p key={i}>{line || "\u00A0"}</p>
-                    ))}
+                    initialBrd.brd_draft.split('\n').map((line, i) => {
+                      const formattedLine = formatMarkdownText(line);
+                      return <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine || "&nbsp;" }} />;
+                    })}
                 </div>
               </div>
             </CardContent>

@@ -110,4 +110,33 @@
   .glass-card {
     @apply backdrop-blur-sm bg-white/90 border border-blue-100 shadow-lg;
   }
+  
+  /* Markdown formatting styles */
+  strong {
+    @apply font-bold;
+  }
+  
+  em {
+    @apply italic;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-blue-800 my-3;
+  }
+  
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
+  ul li {
+    @apply list-disc list-inside my-1;
+  }
 }

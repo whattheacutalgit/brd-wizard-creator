@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from "@/lib/api";
@@ -10,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileText, Download, Copy, Check, Plus, Trash, ExternalLink, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface FinalBrdResponse {
   brd_document: string;
@@ -32,7 +32,6 @@ const BrdGenerationFinal = () => {
   const [newQuestion, setNewQuestion] = useState("");
 
   useEffect(() => {
-    // Getting data from navigation state or fetching it if needed
     if (location.state) {
       const { questions, content, summary, projectId: id, uploadDate: date } = location.state;
       setQuestions(questions || []);
@@ -41,15 +40,12 @@ const BrdGenerationFinal = () => {
       setProjectId(id || "");
       setUploadDate(date || new Date().toISOString());
       
-      // Initialize answers object with empty strings for each question
       const initialAnswers: Record<string, string> = {};
       questions?.forEach((q: string) => {
         initialAnswers[q] = "";
       });
       setAnswers(initialAnswers);
     } else {
-      // If no state was passed, fetch data from API
-      // In a real app, you would implement this
       toast.error("Missing BRD information. Please start over.");
       navigate("/dashboard");
     }
@@ -105,7 +101,6 @@ const BrdGenerationFinal = () => {
     if (!projectId) return;
     
     try {
-      // Use the api function directly with custom options
       const url = `/api/brd/download?project_id=${projectId}`;
       window.open(`http://127.0.0.1:8000${url}`, '_blank');
       toast.success("Downloading document");
@@ -133,27 +128,19 @@ const BrdGenerationFinal = () => {
   const openInCanva = () => {
     if (!finalBrd) return;
     
-    // Create a formatted date string for the document title
     const formattedDate = new Date(uploadDate).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
     
-    // Prepare the content for Canva
     const encodedContent = encodeURIComponent(finalBrd.brd_document);
     const documentTitle = encodeURIComponent(`BRD - ${formattedDate}`);
     
-    // Canva Create URL with document content
-    // Note: This is a simplified approach, Canva's actual API might require specific formatting
     const canvaUrl = `https://www.canva.com/design/create?type=document&title=${documentTitle}`;
     
-    // Open Canva in a new tab
     window.open(canvaUrl, '_blank');
     toast.success("Opening in Canva for editing");
-    
-    // Note: In a real implementation, you would need to use Canva's official API
-    // and follow their guidelines for document creation and content insertion
   };
 
   return (
@@ -271,9 +258,10 @@ const BrdGenerationFinal = () => {
                 <CardContent className="p-6">
                   <div className="prose max-w-none dark:prose-invert">
                     <div className="p-6 border border-blue-200 rounded-md bg-white shadow-sm">
-                      {finalBrd.brd_document.split('\n').map((line, i) => (
-                        <p key={i}>{line || "\u00A0"}</p>
-                      ))}
+                      {finalBrd.brd_document.split('\n').map((line, i) => {
+                        const formattedLine = formatMarkdownText(line);
+                        return <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine || "&nbsp;" }} />;
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -291,9 +279,10 @@ const BrdGenerationFinal = () => {
                 <CardContent className="p-6">
                   <div className="prose max-w-none dark:prose-invert">
                     <div className="p-4 border border-blue-200 rounded-md bg-blue-50/50">
-                      {finalBrd.review_feedback.split('\n').map((line, i) => (
-                        <p key={i}>{line || "\u00A0"}</p>
-                      ))}
+                      {finalBrd.review_feedback.split('\n').map((line, i) => {
+                        const formattedLine = formatMarkdownText(line);
+                        return <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine || "&nbsp;" }} />;
+                      })}
                     </div>
                   </div>
                 </CardContent>
