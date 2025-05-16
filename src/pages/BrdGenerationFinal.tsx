@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { apiPost, apiGet } from "@/lib/api";
@@ -11,6 +10,7 @@ import { FileText, Copy, Check, Plus, Trash, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import BrdEditor from "@/components/BrdEditor";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface FinalBrdResponse {
   brd_document: string;

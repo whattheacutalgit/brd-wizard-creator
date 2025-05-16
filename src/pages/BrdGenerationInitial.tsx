@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { FileText, ArrowRight, UploadCloud } from "lucide-react";
+import { formatMarkdownText } from "@/lib/utils";
 
 interface Project {
   id: string;
