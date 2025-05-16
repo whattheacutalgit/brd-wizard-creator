@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { apiPost, apiGet } from "@/lib/api";
+import { apiPost, apiGet,apiUpload } from "@/lib/api";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,27 +77,36 @@ const BrdGenerationFinal = () => {
     delete newAnswers[questionToRemove];
     setAnswers(newAnswers);
   };
+const handleGenerateFinalBrd = async () => {
+  if (!brdId || Object.values(answers).some(a => !a.trim())) {
+    toast.error("Please answer all questions to generate the final BRD");
+    return;
+  }
 
-  const handleGenerateFinalBrd = async () => {
-    if (!brdId || Object.values(answers).some(a => !a.trim())) {
-      toast.error("Please answer all questions to generate the final BRD");
-      return;
+  setGenerating(true);
+  try {
+    const formData = new FormData();
+    formData.append("project_id", projectId);
+    formData.append("prompt", initialSummary);
+    formData.append("completion_answers", JSON.stringify(answers));
+
+    // Optional: If you want to send the same template file used in initial step (if available)
+    const lastTemplate = location.state?.template as File | undefined;
+    if (lastTemplate) {
+      formData.append("template", lastTemplate);
     }
 
-    setGenerating(true);
-    try {
-      const response = await apiPost<FinalBrdResponse>("/api/brd/generate-final", {
-        project_id: projectId,
-        completion_answers: JSON.stringify(answers)
-      });
-      setFinalBrd(response);
-      toast.success("Final BRD generated successfully");
-    } catch (error) {
-      console.error("Failed to generate final BRD", error);
-    } finally {
-      setGenerating(false);
-    }
-  };
+    const response = await apiUpload<FinalBrdResponse>("/api/brd/generate-final", formData);
+    setFinalBrd(response);
+    toast.success("Final BRD generated successfully");
+  } catch (error) {
+    console.error("Failed to generate final BRD", error);
+    toast.error("Failed to generate final BRD");
+  } finally {
+    setGenerating(false);
+  }
+};
+
 
   const handleDownload = async () => {
     if (!projectId) return;
